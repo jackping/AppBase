@@ -1,2 +1,2 @@
 # AppBase
-a android base library by kotlin user mvp
+a android base library by kotlin use mvp
