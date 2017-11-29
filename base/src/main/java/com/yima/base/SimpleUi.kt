@@ -80,7 +80,6 @@ abstract class SimpleFragment : SupportFragment() {
         }
     }
 
-
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)
         if (!isInit && !hidden) {
@@ -89,7 +88,7 @@ abstract class SimpleFragment : SupportFragment() {
         }
     }
 
-    fun onKeyDown(keyCode: Int, event: KeyEvent?) = true
+    open fun onKeyDown(keyCode: Int, event: KeyEvent?) = true
 
     protected abstract val layoutId: Int
 
