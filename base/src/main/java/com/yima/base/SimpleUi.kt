@@ -89,7 +89,7 @@ abstract class SimpleFragment : SupportFragment() {
         }
     }
 
-    fun onKeyDown(keyCode: Int, event: KeyEvent) = true
+    fun onKeyDown(keyCode: Int, event: KeyEvent?) = true
 
     protected abstract val layoutId: Int
 
