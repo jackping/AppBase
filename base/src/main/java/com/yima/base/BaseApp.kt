@@ -13,6 +13,7 @@ import android.view.WindowManager
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
+import java.lang.ref.WeakReference
 
 
 /**
@@ -20,8 +21,7 @@ import timber.log.Timber
  * Created by yima on 2017/6/13.
  */
 abstract class BaseApp : Application() {
-
-    private var allActivities = SparseArray<Activity>()
+    private val actManager = BaseActManager()
     var SCREEN_WIDTH = -1
     var SCREEN_HEIGHT = -1
     var DIMEN_RATE = -1.0F
@@ -78,28 +78,19 @@ abstract class BaseApp : Application() {
     }
 
     fun addActivity(act: Activity) {
-        if (allActivities.get(act.hashCode()) == null) {
-            allActivities.append(act.hashCode(), act)
-        }
+        actManager.addActivity(act)
     }
 
     fun removeActivity(act: Activity) {
-        val tmpAct = allActivities.get(act.hashCode())
-        if (tmpAct != null) {
-            allActivities.remove(act.hashCode())
-        }
+        actManager.removeActivity(act)
+    }
+
+    fun getTopActivity(): Activity? {
+        return actManager.getTopActivity()
     }
 
     fun clearActivity() {
-        synchronized(allActivities) {
-            var i = 0
-            while (i < allActivities.size()) {
-                val key = allActivities.keyAt(i)
-                allActivities.get(key)?.finishAffinity()
-                allActivities.remove(key)
-                i++
-            }
-        }
+        actManager.clearActivity()
     }
 
     fun exitApp() {
@@ -143,5 +134,53 @@ class InstrumentationBase : Instrumentation() {
             bundle = Bundle.EMPTY
         }
         super.callActivityOnCreate(activity, bundle, persistentState)
+    }
+}
+
+class BaseActManager {
+    private val container = SparseArray<WeakReference<Activity>>()
+    private var topAct: WeakReference<Activity>? = null
+
+
+    fun addActivity(act: Activity) {
+        if (container.get(act.hashCode()) == null) {
+            container.append(act.hashCode(), WeakReference(act))
+            topAct = WeakReference(act)
+        }
+    }
+
+    fun removeActivity(act: Activity) {
+        val tmpAct = container.get(act.hashCode())
+        if (tmpAct != null) {
+            container.remove(act.hashCode())
+            topAct = if (container.size() == 0) {
+                null
+            } else {
+                container.get(container.keyAt(container.size() - 1))
+            }
+        }
+    }
+
+    fun getTopActivity(): Activity? {
+        if (container.size() <= 0) {
+            return null
+        }
+        return topAct?.get()
+    }
+
+    fun clearActivity() {
+        synchronized(container) {
+            var i = 0
+            while (i < container.size()) {
+                val key = container.keyAt(i)
+                val weak = container.get(key)
+                if (weak?.get() != null) {
+                    weak.get()!!.finishAffinity()
+                }
+                container.remove(key)
+                i++
+            }
+            topAct = null
+        }
     }
 }
