@@ -18,6 +18,10 @@ import me.yokeyword.fragmentation.SupportFragment
 
 abstract class SimpleActivity : SupportActivity() {
     protected lateinit var mContext: Activity
+    var isForeground: Boolean = false
+        private set(value) {
+            field = value
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +44,16 @@ abstract class SimpleActivity : SupportActivity() {
 
     protected open fun inflateView() {
         setContentView(layoutId)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        isForeground = true
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isForeground = false
     }
 }
 
