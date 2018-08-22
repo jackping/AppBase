@@ -71,8 +71,8 @@ abstract class SimpleFragment : SupportFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        mActivity = activity
-        mContext = context
+        mActivity = activity as Activity
+        mContext = context ?: BaseApp.getApp()
     }
 
     override fun onAttach(context: Context?) {
